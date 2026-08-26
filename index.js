@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-const listenerRoutes = require("./Routes/ListenerRoutes");
+const listenerRoutes = require("./Routes/listenerRoutes");
 
 app.get("/", (req, res) => {
   res.send("EchoStream backend is running!");
