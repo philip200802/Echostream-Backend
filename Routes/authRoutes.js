@@ -1,5 +1,6 @@
 const express = require('express');
-const router = module.exports = express.Router();
+const router = express.Router();
+
 const { 
     getSignUp, 
     getSignin, 
@@ -22,12 +23,14 @@ router.get('/welcome-email', (req, res) => {
         user: { email: 'johndoe@gmail.com', fullName: 'John Doe' }
     });
 });
+
 router.get('/reset-password-email', (req, res) => {
     res.render('forgotPasswordEmail', {
         user: { email: 'johndoe@gmail.com', fullName: 'John Doe' },
         resetLink: 'http://localhost:2010/api/auth/reset-password/mocktoken123'
     });
-}); 
+});
+
 router.post('/signup', getSignUp);
 router.post('/signin', getSignin);
 router.get('/verify-email/:token', verifyEmail);
@@ -48,6 +51,5 @@ router.get('/reset-password', (req, res) => {
 router.get('/resend-verification-email', (req, res) => {
     res.render('resendVerificationEmail');
 });
-
 
 module.exports = router;

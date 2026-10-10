@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const app = express();
+app.get("/", (req, res) => {
 
 
 
@@ -10,7 +11,9 @@ app.use(cors());
 app.use(express.json());
 const authRoutes = require("./Routes/authRoutes");
 
-app.get("/", (req, res) => {
+app.use("/api/auth", authRoutes);
+
+app.set("view engine", "ejs");
   res.send("EchoStream backend is running!");
 });
 const path = require("path");
