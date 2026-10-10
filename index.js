@@ -2,22 +2,24 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
+const path = require("path"); 
+
 const app = express();
-app.get("/", (req, res) => {
-
-
 
 app.use(cors());
 app.use(express.json());
+
+const viewsPath = path.join(__dirname, "Views"); 
+app.set("view engine", "ejs");
+app.set("views", viewsPath);
+
 const authRoutes = require("./Routes/authRoutes");
 
 app.use("/api/auth", authRoutes);
 
-app.set("view engine", "ejs");
-  res.send("EchoStream backend is running!");
+app.get("/", (req, res) => {
+    res.send("EchoStream backend is running!");
 });
-const path = require("path");
-
 
 const PORT = process.env.PORT || 2010;
 mongoose
@@ -25,7 +27,6 @@ mongoose
   .then(() => {
     console.log("MongoDB connected successfully!");
 
-    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

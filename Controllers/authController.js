@@ -238,7 +238,7 @@ const welcomeEmail = async (user) => {
     }
 }
 
-const resetPassword = async (req, res) => {
+const resetPasswordRequest = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
@@ -297,7 +297,7 @@ const sendResetPasswordEmail = async (user, resetToken) => {
     }
 }
 
-const resetPasswordConfirm = async (req, res) => {
+const confirmResetPassword = async (req, res) => {
     try {
         const { token } = req.params;
         const { newPassword } = req.body;
@@ -359,4 +359,13 @@ const resendResetPasswordEmail = async (req, res) => {
 }
 
 
-module.exports= {getSignUp, getSignin, verifyEmail, sendVerificationEmail, resendVerificationEmail, welcomeEmail, resetPassword, resetPasswordConfirm, sendResetPasswordEmail, resendResetPasswordEmail}
+module.exports= module.exports = {
+    getSignUp,
+    getSignin,
+    verifyEmail,
+    resendVerificationEmail,
+    resetPasswordRequest,
+    confirmResetPassword, 
+    welcomeEmail,
+    resendResetPasswordEmail
+};
