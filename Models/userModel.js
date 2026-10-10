@@ -29,7 +29,7 @@ let userSchema = mongoose.Schema({
         type: Date,
         default: null,
     },
-    
+
     isVerified: {
         type: Boolean,
         default: false,
@@ -47,6 +47,6 @@ let userSchema = mongoose.Schema({
 
 
 
-const Listener = mongoose.model('user', userSchema);
+const User = mongoose.model('User', userSchema);
 
-module.exports = Listener;
+module.exports = User;
