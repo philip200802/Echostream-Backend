@@ -16,6 +16,20 @@ let userSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    role: {
+        type: String,
+        enum: ['listener', 'artist', 'admin'],
+        default: 'listener'
+    },
+    resetPasswordToken: {
+        type: String,
+        default: null,
+    },
+    resetPasswordExpires: {
+        type: Date,
+        default: null,
+    },
+    
     isVerified: {
         type: Boolean,
         default: false,
