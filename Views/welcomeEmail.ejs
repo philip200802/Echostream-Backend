@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to EchoStream</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #fafbfc; 
+            padding: 50px 20px; 
+            margin: 0;
+            color: #1a1a1a;
+        }
+        .card { 
+            background: #ffffff; 
+            padding: 40px; 
+            border-radius: 24px; 
+            max-width: 540px; 
+            width: 100%;
+            margin: 0 auto; 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            background-color: #f0f7f6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px auto;
+        }
+        .icon-svg {
+            width: 32px;
+            height: 32px;
+            stroke: #00665c;
+            fill: none;
+        }
+        h2 {
+            color: #0d1b1e;
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+        p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #4a5558;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        .btn-container {
+            margin: 32px 0 24px 0;
+        }
+        .btn { 
+            display: block; 
+            padding: 14px 24px; 
+            background-color: #00665c; 
+            color: #ffffff !important; 
+            text-decoration: none; 
+            border-radius: 100px; 
+            font-weight: 600; 
+            font-size: 15px;
+        }
+        .footer { 
+            margin-top: 40px; 
+            padding-top: 24px;
+            border-top: 1px solid #f0f2f3;
+            font-size: 12px; 
+            color: #9aa5a8; 
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon-container">
+            <!-- Sparkles/Welcome Icon -->
+            <svg class="icon-svg" xmlns="http://w3.org" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.187L15 15l-5.187.904ZM18 7.5l-.563 3.563L14 11.5l3.438.563.563 3.563.563-3.563L22 11.5l-3.438-.563-.563-3.563Z" />
+            </svg>
+        </div>
+        
+        <h2>Your email is verified!</h2>
+        <p>Welcome to EchoStream, <strong><%= user.fullName %></strong>! Your account has been officially activated. Get ready to explore streams, discover new sounds, and connect with artists around the globe.</p>
+        
+        <div class="btn-container">
+            <a href="https://echostream-ng.netlify.app/listener/signup" class="btn">Launch EchoStream</a>
+        </div>
+        
+        <div class="footer">
+            You received this email because you recently verified an account on EchoStream.<br>
+            &copy; 2026 EchoStream. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

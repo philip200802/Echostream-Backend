@@ -8,11 +8,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-const listenerRoutes = require("./Routes/listenerRoutes");
+const authRoutes = require("./Routes/authRoutes");
 
 app.get("/", (req, res) => {
   res.send("EchoStream backend is running!");
 });
+const path = require("path");
+
 
 const PORT = process.env.PORT || 2010;
 mongoose
