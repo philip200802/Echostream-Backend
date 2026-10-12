@@ -9,7 +9,6 @@ const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
-// Helper to create a standard nodemailer transporter
 const createTransporter = () => {
     return nodemailer.createTransport({
         host: process.env.SMTP_SERVER,
@@ -17,7 +16,7 @@ const createTransporter = () => {
         secure: false,
         auth: {
             user: process.env.SMTP_USER,
-            pass: process.env.SMTP_KEY
+            pass: process.env.BREVO_API_KEY || process.env.BREVO_API_KEY 
         }
     });
 };
@@ -116,7 +115,6 @@ const verifyEmail = async (req, res) => {
         user.verificationTokenExpires = null;
         await user.save();
 
-        // Optional: Send welcome email right after verification
         await welcomeEmail(user);
 
         res.status(200).json({ success: true, message: 'Email verified successfully' });
@@ -131,13 +129,12 @@ const sendVerificationEmail = async (user) => {
         const templatePath = path.join(__dirname, '../Views/verifyEmail.ejs');
         const html = await ejs.renderFile(templatePath, { user, fullName: user.fullName, verificationLink });
 
-        // If you want to use Brevo Web API instead of SMTP Nodemailer:
-        if (process.env.STMP_API_KEY) {
+        if (process.env.BREVO_API_KEY) {
             const response = await fetch("https://api.brevo.com/v3/smtp/email", {
                 method: "POST",
                 headers: {
                     "accept": "application/json",
-                    "api-key": process.env.STMP_API_KEY,
+                    "api-key": process.env.BREVO_API_KEY,
                     "content-type": "application/json"
                 },
                 body: JSON.stringify({
@@ -154,7 +151,6 @@ const sendVerificationEmail = async (user) => {
             }
             console.log('Verification email sent via Brevo API:', responseData);
         } else {
-            // Fallback to Nodemailer SMTP
             const transporter = createTransporter();
             const mailOptions = {
                 from: `"EchoStream" <${process.env.SMTP_USER}>`,
