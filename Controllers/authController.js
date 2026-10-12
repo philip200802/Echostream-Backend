@@ -143,7 +143,7 @@ const sendVerificationEmail = async (user) => {
     try {
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_SERVER,     
-        port: 587,
+        port: Number(process.env.SMTP_PORT),
         secure: false, 
         auth: {
             user: process.env.SMTP_USER,
