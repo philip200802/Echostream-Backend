@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 const { 
-     getSignUp,
-        getSignin,
-        verifyEmail,
-        resendVerificationEmail,
-        resetPasswordRequest,
-        confirmResetPassword,
-        welcomeEmail,
-        resendResetPasswordEmail      
+       getSignUp,
+    getSignin,
+    verifyEmail,
+    resendVerificationEmail,
+    resetPasswordRequest,
+    confirmResetPassword,
+    welcomeEmail     
 } = require('../Controllers/authController'); 
 
 router.get('/preview-email', (req, res) => {
