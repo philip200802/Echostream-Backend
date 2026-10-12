@@ -272,6 +272,24 @@ const confirmResetPassword = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+const resendResetPasswordEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetToken = resetToken;
+        user.resetTokenExpires = Date.now() + 15 * 60 * 1000;
+        await user.save();
+        resetLink = `${process.env.FRONTEND_URL}/forgot/password?token=${resetToken}`;
+        await sendResetPasswordEmail(user, resetToken);
+        res.status(200).json({ success: true, message: 'Password reset email resent successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 module.exports = {
     getSignUp,
@@ -280,5 +298,6 @@ module.exports = {
     resendVerificationEmail,
     resetPasswordRequest,
     confirmResetPassword,
-    welcomeEmail
+    welcomeEmail, 
+    resendResetPasswordEmail
 };
