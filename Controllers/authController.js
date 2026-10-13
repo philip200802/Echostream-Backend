@@ -107,7 +107,7 @@ const verifyEmail = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
+            return res.redirect(`${process.env.FRONTEND_URI}/email-not-verified`);
         }
 
         user.isVerified = true;
