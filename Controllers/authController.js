@@ -262,7 +262,7 @@ const sendResetPasswordEmail = async (user, resetToken) => {
         }
 
         const resetLink =
-            `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+            `${process.env.FRONTEND_URI}/reset-password/${resetToken}`;
 
         const templatePath = path.join(
             __dirname,
