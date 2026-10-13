@@ -51,5 +51,5 @@ router.post('/resend-verification', resendVerificationEmail);
 router.post('/forgot-password', resetPasswordRequest);
 router.post('/resend-reset-password', resendResetPasswordEmail);
 router.post('/reset-password/:token', confirmResetPassword);
-
+router.put("/reset-password/:token", confirmResetPassword);
 module.exports = router;
