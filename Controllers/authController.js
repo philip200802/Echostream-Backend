@@ -125,7 +125,7 @@ const verifyEmail = async (req, res) => {
 
 const sendVerificationEmail = async (user) => {
     try {
-        const verificationLink = `https://${process.env.BACKEND_URI}/api/auth/verify-email/${user.verificationToken}`;
+        const verificationLink = `${process.env.BACKEND_URI}/api/auth/verify-email/${user.verificationToken}`;
         const templatePath = path.join(__dirname, '../Views/verifyEmail.ejs');
         const html = await ejs.renderFile(templatePath, { user, fullName: user.fullName, verificationLink });
 
