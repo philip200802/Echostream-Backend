@@ -119,7 +119,8 @@ const verifyEmail = async (req, res) => {
 
             res.redirect(`${process.env.FRONTEND_URI}/email_verified`);
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('Email verification failed:', error);
+        return res.redirect(`${process.env.FRONTEND_URI}/email-not-verified`);
     }
 };
 
