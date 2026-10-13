@@ -16,7 +16,7 @@ const createTransporter = () => {
         secure: false,
         auth: {
             user: process.env.SMTP_USER,
-            pass: process.env.BREVO_API_KEY || process.env.BREVO_API_KEY 
+            pass: process.env.BREVO_API_KEY || process.env.BREVO_API_KEY
         }
     });
 };
@@ -117,7 +117,7 @@ const verifyEmail = async (req, res) => {
 
         await welcomeEmail(user);
 
-        res.status(200).json({ success: true, message: 'Email verified successfully' });
+            res.redirect(`${process.env.FRONTEND_URI}/email_verified`);
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -193,20 +193,40 @@ const resendVerificationEmail = async (req, res) => {
 
 const welcomeEmail = async (user) => {
     try {
-        const transporter = createTransporter();
         const templatePath = path.join(__dirname, '../Views/welcomeEmail.ejs');
         const html = await ejs.renderFile(templatePath, { user, fullName: user.fullName });
 
-        const mailOptions = {
-            from: `"EchoStream" <${process.env.SMTP_USER}>`,
-            to: user.email,
-            subject: 'Welcome to EchoStream!',
-            html: html
-        };
+        const brevoApiKey = process.env.BREVO_API_KEY?.trim();
+        const brevoApiUrl = "https://api.brevo.com/v3/smtp/email";
+        if (brevoApiKey) {
+            const response = await fetch(brevoApiUrl, {
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`Welcome email sent successfully: ${info.messageId}`);
-    } catch (error) {
+                method: "POST",
+                headers: {
+                    "accept": "application/json",
+                    "api-key": brevoApiKey,
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    sender: { name: process.env.EMAIL_FROM_NAME, email: process.env.EMAIL_FROM },
+                    to: [{ email: user.email, name: user.fullName }],
+                    subject: "Welcome to EchoStream!",
+                    htmlContent: html
+                })
+            });
+
+            const responseData = await response.json();
+            if (!response.ok) {
+                const providerMessage = responseData.message || response.statusText;
+                throw new Error(
+                    `Brevo API Error (${response.status}): ${providerMessage}. ` +
+                    'Check that BREVO_API_KEY is the current Brevo v3 API key configured in Render.'
+                );
+            }
+            console.log('Welcome email sent via Brevo API:', responseData);
+        }
+    }
+    catch (error) {
         console.error('Email delivery failed:', error);
     }
 };
@@ -231,25 +251,70 @@ const resetPasswordRequest = async (req, res) => {
     }
 };
 
+
 const sendResetPasswordEmail = async (user, resetToken) => {
     try {
-        const transporter = createTransporter();
-        const resetLink = `http://localhost:${process.env.PORT || 2010}/api/auth/reset-password/${resetToken}`;
-        const templatePath = path.join(__dirname, '../Views/resetPasswordEmail.ejs');
-        const html = await ejs.renderFile(templatePath, { user, fullName: user.fullName, resetLink });
+        const brevoApiKey = process.env.BREVO_API_KEY?.trim();
 
-        const mailOptions = {
-            from: `"EchoStream" <${process.env.SMTP_USER}>`,
-            to: user.email,
-            subject: 'Reset your EchoStream Password',
-            html: html
-        };
+        if (!brevoApiKey) {
+            throw new Error("BREVO_API_KEY is missing.");
+        }
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`Password reset email sent successfully: ${info.messageId}`);
+        const resetLink =
+            `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+        const templatePath = path.join(
+            __dirname,
+            '../Views/resetPasswordEmail.ejs'
+        );
+
+        const html = await ejs.renderFile(templatePath, {
+            user,
+            fullName: user.fullName,
+            resetLink
+        });
+
+        const response = await fetch(
+            "https://api.brevo.com/v3/smtp/email",
+            {
+                method: "POST",
+                headers: {
+                    "accept": "application/json",
+                    "api-key": brevoApiKey,
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: process.env.EMAIL_FROM_NAME,
+                        email: process.env.EMAIL_FROM
+                    },
+                    to: [{
+                        email: user.email,
+                        name: user.fullName
+                    }],
+                    subject: "Reset your EchoStream Password",
+                    htmlContent: html
+                })
+            }
+        );
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                `Brevo API Error (${response.status}): ${
+                    responseData.message || response.statusText
+                }`
+            );
+        }
+
+        console.log(
+            "Password reset email sent via Brevo API:",
+            responseData
+        );
     } catch (error) {
-        console.error('Email delivery failed:', error);
-        throw new Error('Failed to send password reset email.');
+        console.error("Password reset email failed:", error);
+        throw new Error("Failed to send password reset email.");
     }
 };
 
@@ -258,6 +323,13 @@ const confirmResetPassword = async (req, res) => {
         const { token } = req.params;
         const { newPassword } = req.body;
 
+
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 8 characters long'
+            });
+        }
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }
@@ -288,8 +360,8 @@ const resendResetPasswordEmail = async (req, res) => {
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
         await user.save();
-        resetLink = `${process.env.FRONTEND_URL}/forgot/password?token=${resetToken}`;
         await sendResetPasswordEmail(user, resetToken);
+        resetLink = `${process.env.FRONTEND_URL}/forgot/password?token=${resetToken}`; 
         res.status(200).json({ success: true, message: 'Password reset email resent successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -303,6 +375,6 @@ module.exports = {
     resendVerificationEmail,
     resetPasswordRequest,
     confirmResetPassword,
-    welcomeEmail, 
+    welcomeEmail,
     resendResetPasswordEmail
 };
