@@ -32,7 +32,7 @@ router.get('/welcome-email', (req, res) => {
 });
 
 router.get('/reset-password-email', (req, res) => {
-    res.render('resetPassword', {
+    res.render('resetPasswordEmail', {
         user: {
             email: 'johndoe@gmail.com',
             fullName: 'John Doe'

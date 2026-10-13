@@ -41,7 +41,7 @@ const getSignUp = async (req, res) => {
             fullName,
             email,
             password: hashedPassword,
-            role: role === 'artist' ? 'artist' : 'listener',
+            role: role === 'admin' ? 'admin' : role === 'artist' ? 'artist' : 'listener',
             verificationToken,
             verificationTokenExpires
         });
@@ -125,16 +125,17 @@ const verifyEmail = async (req, res) => {
 
 const sendVerificationEmail = async (user) => {
     try {
-        const verificationLink = `http://localhost:${process.env.PORT || 2010}/api/auth/verify-email/${user.verificationToken}`;
+        const verificationLink = `http://${process.env.BACKEND_URI}/api/auth/verify-email/${user.verificationToken}`;
         const templatePath = path.join(__dirname, '../Views/verifyEmail.ejs');
         const html = await ejs.renderFile(templatePath, { user, fullName: user.fullName, verificationLink });
 
-        if (process.env.BREVO_API_KEY) {
+        const brevoApiKey = process.env.BREVO_API_KEY?.trim();
+        if (brevoApiKey) {
             const response = await fetch("https://api.brevo.com/v3/smtp/email", {
                 method: "POST",
                 headers: {
                     "accept": "application/json",
-                    "api-key": process.env.BREVO_API_KEY,
+                    "api-key": brevoApiKey,
                     "content-type": "application/json"
                 },
                 body: JSON.stringify({
@@ -147,7 +148,11 @@ const sendVerificationEmail = async (user) => {
 
             const responseData = await response.json();
             if (!response.ok) {
-                throw new Error(`Brevo API Error: ${responseData.message || response.statusText}`);
+                const providerMessage = responseData.message || response.statusText;
+                throw new Error(
+                    `Brevo API Error (${response.status}): ${providerMessage}. ` +
+                    'Check that BREVO_API_KEY is the current Brevo v3 API key configured in Render.'
+                );
             }
             console.log('Verification email sent via Brevo API:', responseData);
         } else {
@@ -215,8 +220,8 @@ const resetPasswordRequest = async (req, res) => {
         }
 
         const resetToken = crypto.randomBytes(32).toString("hex");
-        user.resetToken = resetToken;
-        user.resetTokenExpires = Date.now() + 15 * 60 * 1000;
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
         await user.save();
 
         await sendResetPasswordEmail(user, resetToken);
@@ -230,7 +235,7 @@ const sendResetPasswordEmail = async (user, resetToken) => {
     try {
         const transporter = createTransporter();
         const resetLink = `http://localhost:${process.env.PORT || 2010}/api/auth/reset-password/${resetToken}`;
-        const templatePath = path.join(__dirname, '../Views/resetPassword.ejs');
+        const templatePath = path.join(__dirname, '../Views/resetPasswordEmail.ejs');
         const html = await ejs.renderFile(templatePath, { user, fullName: user.fullName, resetLink });
 
         const mailOptions = {
@@ -254,8 +259,8 @@ const confirmResetPassword = async (req, res) => {
         const { newPassword } = req.body;
 
         const user = await User.findOne({
-            resetToken: token,
-            resetTokenExpires: { $gt: Date.now() }
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
         });
 
         if (!user) {
@@ -263,8 +268,8 @@ const confirmResetPassword = async (req, res) => {
         }
 
         user.password = await bcrypt.hash(newPassword, 10);
-        user.resetToken = null;
-        user.resetTokenExpires = null;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
         await user.save();
 
         res.status(200).json({ success: true, message: 'Password reset successfully' });
@@ -279,9 +284,9 @@ const resendResetPasswordEmail = async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-        resetToken = crypto.randomBytes(32).toString("hex");
-        user.resetToken = resetToken;
-        user.resetTokenExpires = Date.now() + 15 * 60 * 1000;
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
         await user.save();
         resetLink = `${process.env.FRONTEND_URL}/forgot/password?token=${resetToken}`;
         await sendResetPasswordEmail(user, resetToken);
